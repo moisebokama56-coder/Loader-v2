@@ -1,0 +1,33 @@
+name: BotGhost GitHub Update
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Send update to BotGhost
+        env:
+          BOTGHOST_URL: ${{ secrets.BOTGHOST_URL }}
+          BOTGHOST_API_KEY: ${{ secrets.BOTGHOST_API_KEY }}
+          USER: ${{ github.actor }}
+          COMMIT: ${{ github.sha }}
+        run: |
+          MESSAGE="🚀 **NEXON HUB UPDATE**
+
+          The script has been updated!
+
+          📦 Repository: Loader-v2
+          🌿 Branch: main
+          👤 Updated by: $USER
+          🔄 Commit: ${COMMIT:0:7}"
+
+          curl -X POST "$BOTGHOST_URL" \
+            -H "Authorization: $BOTGHOST_API_KEY" \
+            -H "Content-Type: application/json" \
+            --data "$(jq -n --arg msg "$MESSAGE" \
+              '{"variables":[{"name":"message","variable":"{event_message}","value":$msg}]}')"
